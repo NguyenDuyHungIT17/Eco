@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Eco.Api/Eco.Api.csproj" />
+    <Project Path="src/Eco.Application/Eco.Application.csproj" />
+    <Project Path="src/Eco.BackgroundJobs/Eco.BackgroundJobs.csproj" />
+    <Project Path="src/Eco.Domain/Eco.Domain.csproj" />
+    <Project Path="src/Eco.Identity/Eco.Identity.csproj" />
+    <Project Path="src/Eco.Infrastructure/Eco.Infrastructure.csproj" />
+    <Project Path="src/Eco.Persistence/Eco.Persistence.csproj" />
+    <Project Path="src/Eco.Shared/Eco.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Eco.IntegrationTests/Eco.IntegrationTests.csproj" />
+    <Project Path="tests/Eco.UnitTests/Eco.UnitTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Eco.BackgroundJobs-b5a18a69-5df4-4a3a-b9eb-e65b2b595746</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eco.Application\Eco.Application.csproj" />
+    <ProjectReference Include="..\Eco.Infrastructure\Eco.Infrastructure.csproj" />
+    <ProjectReference Include="..\Eco.Persistence\Eco.Persistence.csproj" />
+    <ProjectReference Include="..\Eco.Identity\Eco.Identity.csproj" />
+  </ItemGroup>
+</Project>

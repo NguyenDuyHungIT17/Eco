@@ -1,0 +1,71 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Eco.Identity/1.0.0": {
+        "dependencies": {
+          "Eco.Application": "1.0.0",
+          "Eco.Domain": "1.0.0",
+          "Eco.Shared": "1.0.0"
+        },
+        "runtime": {
+          "Eco.Identity.dll": {}
+        }
+      },
+      "Eco.Application/1.0.0": {
+        "dependencies": {
+          "Eco.Domain": "1.0.0",
+          "Eco.Shared": "1.0.0"
+        },
+        "runtime": {
+          "Eco.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Eco.Domain/1.0.0": {
+        "runtime": {
+          "Eco.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Eco.Shared/1.0.0": {
+        "runtime": {
+          "Eco.Shared.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Eco.Identity/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Eco.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Eco.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Eco.Shared/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

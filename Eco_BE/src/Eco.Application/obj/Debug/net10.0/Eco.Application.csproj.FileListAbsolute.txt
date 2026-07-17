@@ -1,0 +1,17 @@
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Application.deps.json
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Application.dll
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Application.pdb
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Domain.dll
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Shared.dll
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Domain.pdb
+D:\Hung\Eco\Eco_BE\src\Eco.Application\bin\Debug\net10.0\Eco.Shared.pdb
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.csproj.AssemblyReference.cache
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.AssemblyInfoInputs.cache
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.AssemblyInfo.cs
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.csproj.CoreCompileInputs.cache
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Appl.3D69A65F.Up2Date
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.dll
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\refint\Eco.Application.dll
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\Eco.Application.pdb
+D:\Hung\Eco\Eco_BE\src\Eco.Application\obj\Debug\net10.0\ref\Eco.Application.dll
