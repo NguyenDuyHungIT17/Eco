@@ -1,0 +1,109 @@
+## Build results
+bin/
+obj/
+Debug/
+Release/
+Artifacts/
+build/
+
+## Visual Studio / IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+.VisualStudioVersion
+
+## Rider / ReSharper
+.idea/
+*.sln.iml
+*.DotSettings.user
+**/.idea/
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+## Compiled files
+*.dll
+*.exe
+*.pdb
+*.so
+*.o
+*.a
+*.dylib
+
+## ASP.NET Core
+appsettings.Development.json
+appsettings.Staging.json
+appsettings.Production.json
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+
+## Testing
+TestResults/
+*.trx
+coverage/
+.coverage
+
+## Logs
+*.log
+logs/
+npm-debug.log
+yarn-error.log
+
+## Database
+*.db
+*.db-shm
+*.db-wal
+*.mdf
+*.ldf
+
+## OS files
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Node / Frontend
+node_modules/
+dist/
+build/
+.npm/
+.parcel-cache/
+
+## Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+## Temporary files
+*.tmp
+*.cache
+*.swp
+*.swo
+*~
+.DS_Store
+
+## Visual Studio cache
+.vs/
+.vscode/
+*.code-workspace
+
+## User-specific files
+*.suo
+*.user
+*.vc.vc.opendb
+
+## IDE temp
+bin/
+obj/
+packages/
