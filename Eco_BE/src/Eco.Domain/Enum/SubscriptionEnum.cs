@@ -6,17 +6,17 @@ namespace Eco.Domain.Enum
 {
     public class SubscriptionEnum
     {
-        public enum SubscriptionPlan
+        public enum SubscriptionPlan // các gói đăng kí
         {
-            Free = 0,
-            Premium = 1,
-            Enterprise = 2
+            Free = 0, // miễn phí
+            Premium = 1, // trả phí
+            Enterprise = 2 // trả phí doanh nghiệp
         }
         public enum SubscriptionStatus
         {
-            Active = 0,
-            Inactive = 1,
-            Expired = 2
+            Active = 0, // hoạt động
+            Inactive = 1, // không hoạt động
+            Expired = 2 // hết hạn
         }
     }
 }
