@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
         try
         {
             var response = await _authService.RegisterAsync(request);
-            return CreatedAtAction(nameof(Register), response);
+            return Ok(response);
         }
         catch (ArgumentException ex)
         {

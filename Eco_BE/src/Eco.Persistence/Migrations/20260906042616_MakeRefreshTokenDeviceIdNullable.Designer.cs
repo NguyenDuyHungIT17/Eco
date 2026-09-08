@@ -4,6 +4,7 @@ using Eco.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Eco.Persistence.Migrations
 {
     [DbContext(typeof(EcoDbContext))]
-    partial class EcoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906042616_MakeRefreshTokenDeviceIdNullable")]
+    partial class MakeRefreshTokenDeviceIdNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

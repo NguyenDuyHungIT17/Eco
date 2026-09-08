@@ -12,7 +12,7 @@ public class RefreshToken : BaseEntity
 
     public DateTime RevokedAt { get; set; }
 
-    public string DeviceId { get; set; }
+    public string? DeviceId { get; set; }
 
     public bool IsRevoked { get; set; }
 }
