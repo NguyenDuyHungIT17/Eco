@@ -1,4 +1,6 @@
 using Eco.Application.Common.Interfaces.Identity;
+using Eco.Application.Common.Responses;
+using Eco.Application.Common.Results;
 using Eco.Application.DTOs.Auth;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -29,18 +31,20 @@ public class AuthController : ControllerBase
         var validationResult = await _registerValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.ToDictionary());
+            return BadRequest(ApiResponse<object>.Fail(
+                "Validation failed.",
+                "VALIDATION_ERROR",
+                validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
         }
 
-        try
+        var result = await _authService.RegisterAsync(request);
+        if (!result.Success)
         {
-            var response = await _authService.RegisterAsync(request);
-            return Ok(response);
+            return Conflict(ApiResponse<RegisterResponseDto>.Fail(result.ErrorMessage!, result.ErrorCode));
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+
+        var responseData = result.Data!;
+        return Ok(ApiResponse<RegisterResponseDto>.Ok(responseData, responseData.Message));
     }
 
     [HttpPost("login")]
@@ -49,46 +53,46 @@ public class AuthController : ControllerBase
         var validationResult = await _loginValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.ToDictionary());
+            return BadRequest(ApiResponse<object>.Fail(
+                "Validation failed.",
+                "VALIDATION_ERROR",
+                validationResult.Errors.Select(error => error.ErrorMessage).ToList()));
         }
 
-        try
+        var result = await _authService.LoginAsync(request);
+        if (!result.Success)
         {
-            var response = await _authService.LoginAsync(request);
-            return Ok(response);
+            var statusCode = result.ErrorCode == nameof(AuthErrorType.AccountLocked)
+                ? StatusCodes.Status403Forbidden
+                : StatusCodes.Status401Unauthorized;
+
+            return StatusCode(statusCode, ApiResponse<AuthResponseDto>.Fail(result.ErrorMessage!, result.ErrorCode));
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+
+        return Ok(ApiResponse<AuthResponseDto>.Ok(result.Data!));
     }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
     {
-        try
+        var result = await _authService.RefreshTokenAsync(request);
+        if (!result.Success)
         {
-            var response = await _authService.RefreshTokenAsync(request);
-            return Ok(response);
+            return Unauthorized(ApiResponse<AuthResponseDto>.Fail(result.ErrorMessage!, result.ErrorCode));
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+
+        return Ok(ApiResponse<AuthResponseDto>.Ok(result.Data!));
     }
 
     [HttpPost("revoke-token")]
     public async Task<IActionResult> RevokeToken([FromBody] string token)
     {
         var result = await _authService.RevokeTokenAsync(token);
-        if (!result)
+        if (!result.Success)
         {
-            return BadRequest(new { message = "Invalid or already revoked token." });
+            return BadRequest(ApiResponse<bool>.Fail(result.ErrorMessage!, result.ErrorCode));
         }
-        return Ok(new { message = "Token revoked successfully." });
+
+        return Ok(ApiResponse<bool>.Ok(result.Data!, "Token revoked successfully."));
     }
 }

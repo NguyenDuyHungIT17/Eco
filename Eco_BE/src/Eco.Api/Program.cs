@@ -5,13 +5,30 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 using Eco.Application;
+using Eco.Api.Middleware;
+using Eco.Application.Common.Responses;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(entry => entry.Value?.Errors.Count > 0)
+            .SelectMany(entry => entry.Value!.Errors.Select(error => error.ErrorMessage))
+            .ToList();
+
+        var response = ApiResponse<object>.Fail("Validation failed.", "VALIDATION_ERROR", errors);
+        return new BadRequestObjectResult(response);
+    };
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -64,6 +81,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 

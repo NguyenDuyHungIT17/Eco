@@ -1,5 +1,6 @@
 using Eco.Application.Common.Interfaces.Identity;
 using Eco.Application.Common.Interfaces.Persistence;
+using Eco.Application.Common.Results;
 using Eco.Application.DTOs.Auth;
 using Eco.Application.Mappings;
 
@@ -21,12 +22,14 @@ public class AuthenticationService : IAuthenticationService
         _tokenService = tokenService;
     }
 
-    public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
+    public async Task<Result<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
     {
         bool exists = await _unitOfWork.Users.AnyAsync(u => u.Username == request.Username || u.Email == request.Email);
         if (exists)
         {
-            throw new ArgumentException("Username or Email already exists.");
+            return Result<RegisterResponseDto>.Fail(
+                nameof(AuthErrorType.DuplicateAccount),
+                "Username or email already exists.");
         }
 
         var userId = Guid.NewGuid();
@@ -49,24 +52,28 @@ public class AuthenticationService : IAuthenticationService
         //_unitOfWork.RefreshTokens.Add(refreshToken);
         //await _unitOfWork.SaveChangesAsync();
 
-        return new RegisterResponseDto
+        return Result<RegisterResponseDto>.Ok(new RegisterResponseDto
         {
             Message = "Registration successful. Please verify your email."
-        };
+        });
     }
 
-    public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
+    public async Task<Result<AuthResponseDto>> LoginAsync(LoginRequestDto request)
     {
         var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Username == request.UsernameOrEmail || u.Email == request.UsernameOrEmail);
         
         if (user == null)
         {
-            throw new ArgumentException("Invalid username or password.");
+            return Result<AuthResponseDto>.Fail(
+                nameof(AuthErrorType.InvalidCredentials),
+                "Invalid username or password.");
         }
 
         if (user.IsLocked)
         {
-            throw new InvalidOperationException("Account is locked.");
+            return Result<AuthResponseDto>.Fail(
+                nameof(AuthErrorType.AccountLocked),
+                "Account is locked.");
         }
 
         bool isPasswordValid = _passwordHasher.Verify(request.Password, user.PasswordHash);
@@ -83,7 +90,9 @@ public class AuthenticationService : IAuthenticationService
             _unitOfWork.LoginHistories.Add(failureHistory);
             await _unitOfWork.SaveChangesAsync();
 
-            throw new ArgumentException("Invalid username or password.");
+            return Result<AuthResponseDto>.Fail(
+                nameof(AuthErrorType.InvalidCredentials),
+                "Invalid username or password.");
         }
 
         user.FailedLoginCount = 0;
@@ -115,23 +124,27 @@ public class AuthenticationService : IAuthenticationService
 
         await _unitOfWork.SaveChangesAsync();
 
-        return (accessToken, refreshTokenStr).ToResponse();
+        return Result<AuthResponseDto>.Ok((accessToken, refreshTokenStr).ToResponse());
     }
 
-    public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+    public async Task<Result<AuthResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
     {
         var refreshToken = await _unitOfWork.RefreshTokens
             .FirstOrDefaultAsync(t => t.Token == request.RefreshToken);
 
         if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiredAt <= DateTime.UtcNow)
         {
-            throw new ArgumentException("Invalid or expired refresh token.");
+            return Result<AuthResponseDto>.Fail(
+                nameof(AuthErrorType.InvalidRefreshToken),
+                "Invalid or expired refresh token.");
         }
 
         var user = await _unitOfWork.Users.GetByIdAsync(refreshToken.UserId);
         if (user == null || user.IsLocked)
         {
-            throw new ArgumentException("User not found or account locked.");
+            return Result<AuthResponseDto>.Fail(
+                user == null ? nameof(AuthErrorType.AccountNotFound) : nameof(AuthErrorType.AccountLocked),
+                user == null ? "User not found." : "Account is locked.");
         }
 
         refreshToken.IsRevoked = true;
@@ -157,22 +170,24 @@ public class AuthenticationService : IAuthenticationService
         _unitOfWork.RefreshTokens.Add(newRefreshToken);
         await _unitOfWork.SaveChangesAsync();
 
-        return (newAccessToken, newRefreshTokenStr).ToResponse();
+        return Result<AuthResponseDto>.Ok((newAccessToken, newRefreshTokenStr).ToResponse());
     }
 
-    public async Task<bool> RevokeTokenAsync(string tokenStr)
+    public async Task<Result<bool>> RevokeTokenAsync(string tokenStr)
     {
         var refreshToken = await _unitOfWork.RefreshTokens
             .FirstOrDefaultAsync(t => t.Token == tokenStr);
 
         if (refreshToken == null || refreshToken.IsRevoked)
         {
-            return false;
+            return Result<bool>.Fail(
+                nameof(AuthErrorType.InvalidRevokeToken),
+                "Invalid or already revoked token.");
         }
 
         refreshToken.IsRevoked = true;
         refreshToken.RevokedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync();
-        return true;
+        return Result<bool>.Ok(true);
     }
 }

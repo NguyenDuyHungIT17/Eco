@@ -6,9 +6,9 @@ namespace Eco.Domain.Enum
 {
     public class Otp
     {
-        public enum OtpPurpose
+        public enum OtpPurpose // mục đích sử dụng mã OTP
         {
-            Register = 0,
+            Register = 0, 
             Login = 1,
             ForgotPassword = 2,
             VerifyEmail = 3,

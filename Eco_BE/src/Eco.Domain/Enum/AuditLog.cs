@@ -8,13 +8,13 @@ namespace Eco.Domain.Enum
     {
         public enum AuditAction
         {
-            Create = 0,
-            Update = 1,
-            Delete = 2,
-            Login = 3,
-            Logout = 4,
-            Export = 5,
-            Import = 6
+            Create = 0, // tạo
+            Update = 1, // cập nhật
+            Delete = 2, // xóa
+            Login = 3, // đăng nhập
+            Logout = 4, // đăng xuất
+            Export = 5, // xuất
+            Import = 6 // nhập
         }
     }
 }
