@@ -16,11 +16,11 @@ public class LoginHistoryConfiguration : BaseEntityConfiguration<LoginHistory>
                .IsRequired();
 
         builder.Property(x => x.Browser)
-               .HasMaxLength(100)
+               .HasMaxLength(2000)
                .IsRequired();
 
         builder.Property(x => x.OperatingSystem)
-               .HasMaxLength(100)
+               .HasMaxLength(1000)
                .IsRequired();
 
         builder.Property(x => x.IpAddress)
@@ -28,7 +28,7 @@ public class LoginHistoryConfiguration : BaseEntityConfiguration<LoginHistory>
                .IsRequired();
 
         builder.Property(x => x.Location)
-               .HasMaxLength(255);
+               .HasMaxLength(1000);
 
         builder.Property(x => x.Success)
                .IsRequired();

@@ -1,0 +1,62 @@
+:root {
+	font-family: "Segoe UI", "Aptos", sans-serif;
+	color: #17251f;
+	background: #f2f5f0;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	--ink: #17251f;
+	--muted: #718078;
+	--green: #176b4b;
+	--line: #dce4dc;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, input { font: inherit; }
+.app { min-height: 100vh; background: radial-gradient(ellipse at 12% 88%, #dce9d9 0, transparent 38%), #f2f5f0; }
+.header { height: 76px; padding: 0 max(7vw, 24px); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dce4dc; background: rgba(250, 252, 248, .82); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 22px; font-weight: 700; }
+.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: white; background: var(--green); border-radius: 9px 9px 9px 2px; font-family: Georgia, serif; font-size: 21px; }
+.brand-period { color: #cf7344; }
+.header-caption, .eyebrow { color: #75847b; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; }
+.container { max-width: 1020px; margin: 0 auto; padding: 80px 28px; }
+.auth-shell { display: grid; grid-template-columns: 1fr 410px; align-items: center; gap: 76px; }
+.auth-intro { padding-bottom: 18px; }
+.eyebrow { margin: 0 0 22px; color: var(--green); }
+.auth-intro h2 { max-width: 440px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 48px; line-height: 1.08; font-weight: 500; }
+.intro-copy { max-width: 360px; margin-top: 20px; color: var(--muted); font-size: 16px; line-height: 1.6; }
+.auth-panel { padding: 30px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 18px 50px rgba(34, 59, 43, .07); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 0 0 24px; border-bottom: 1px solid var(--line); }
+.auth-tabs button { padding: 0 8px 13px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: transparent; font-size: 14px; cursor: pointer; }
+.auth-tabs button.active { color: var(--green); border-color: var(--green); font-weight: 700; }
+.form { display: flex; flex-direction: column; gap: 16px; }
+.form label { display: flex; flex-direction: column; gap: 7px; color: #3d4b43; font-size: 13px; font-weight: 600; }
+.form input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid #cfd9d0; border-radius: 4px; outline: none; color: var(--ink); background: #fff; }
+.form input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 75, .12); }
+.button-primary, .button-secondary, .button-quiet { min-height: 44px; padding: 0 16px; border-radius: 4px; cursor: pointer; font-weight: 650; }
+.button-primary { margin-top: 3px; border: 1px solid var(--green); color: #fff; background: var(--green); }
+.button-primary:hover { background: #10583d; }
+button:disabled { opacity: .62; cursor: wait; }
+.notice { margin: 18px 0 0; font-size: 13px; line-height: 1.5; }
+.error { color: #a3332d; }
+.success { color: #176b4b; }
+.session-view { color: #536258; font-size: 14px; line-height: 1.6; }
+.session-indicator { display: flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 700; }
+.session-indicator span { width: 9px; height: 9px; border-radius: 50%; background: #3a9b69; }
+.session-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.button-secondary { border: 1px solid var(--green); color: var(--green); background: white; }
+.button-quiet { border: 1px solid var(--line); color: #536258; background: #f7f9f6; }
+
+@media (max-width: 760px) {
+	.container { padding: 48px 20px; }
+	.auth-shell { grid-template-columns: 1fr; gap: 26px; max-width: 480px; margin: 0 auto; }
+	.auth-intro h2 { font-size: 38px; }
+	.auth-intro { padding: 0; }
+	.eyebrow { margin-bottom: 14px; }
+}
+
+@media (max-width: 420px) {
+	.header { height: 64px; padding: 0 18px; }
+	.header-caption { font-size: 9px; letter-spacing: .7px; }
+	.auth-panel { padding: 22px 18px; }
+}
