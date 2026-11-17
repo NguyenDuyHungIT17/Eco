@@ -1,248 +1,53 @@
 import { useState } from 'react';
-import {
-  authService,
-  type AuthResponse,
-  type RegisterRequest,
-} from 'shared/services';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Alert, Button, Form, Input, Typography } from 'antd';
+import { authService, type LoginRequest } from 'shared/services';
+import { getAuthErrorMessage } from './Const';
 
-export default function Login() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-
-  const [username, setUsername] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-
-  const [token, setToken] = useState<AuthResponse | null>(null);
-  const [notice, setNotice] = useState('');
-  const [error, setError] = useState('');
+export function Component() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-
+  async function onFinish(values: LoginRequest) {
     setLoading(true);
     setError('');
-    setNotice('');
-
     try {
-      if (mode === 'register') {
-        const data: RegisterRequest = {
-          username,
-          email,
-          password,
-          fullName,
-          phoneNumber,
-        };
-
-        const result = await authService.register(data);
-
-        setNotice(
-          result.message ||
-            'Đăng ký thành công. Bạn có thể đăng nhập.',
-        );
-
-        setMode('login');
-      } else {
-        const result = await authService.login({
-          usernameOrEmail: username,
-          password,
-          deviceInfo: navigator.userAgent,
-          ipAddress: '',
-        });
-
-        setToken(result);
-      }
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : 'Có lỗi xảy ra, vui lòng thử lại.',
-      );
-    } finally {
+      await authService.login(values);
+      navigate(searchParams.get('returnUrl') || '/', { replace: true });
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
       setLoading(false);
     }
   }
 
-  async function refresh() {
-    if (!token) {
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await authService.refreshToken(
-        token.refreshToken,
-      );
-
-      setToken(result);
-      setNotice('Đã làm mới token.');
-    } catch (refreshError) {
-      setError(
-        refreshError instanceof Error
-          ? refreshError.message
-          : 'Không thể làm mới token.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function logout() {
-    if (!token) {
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      await authService.revokeToken(token.refreshToken);
-
-      setToken(null);
-      setNotice('Đã đăng xuất.');
-    } catch (logoutError) {
-      setError(
-        logoutError instanceof Error
-          ? logoutError.message
-          : 'Không thể đăng xuất.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  /*
-   * Nếu đã đăng nhập
-   */
-  if (token) {
-    return (
-      <section className="auth-panel">
-        <h2>Phiên đang hoạt động</h2>
-
-        <p>
-          Token còn hiệu lực khoảng{' '}
-          {Math.ceil(token.expiresInSeconds / 60)} phút.
-        </p>
-
-        <div className="session-actions">
-          <button onClick={refresh} disabled={loading}>
-            Làm mới token
-          </button>
-
-          <button onClick={logout} disabled={loading}>
-            Đăng xuất
-          </button>
-        </div>
-
-        {error && <p className="error">{error}</p>}
-
-        {notice && <p className="success">{notice}</p>}
-      </section>
-    );
-  }
-
-  /*
-   * Login / Register
-   */
   return (
-    <section className="auth-panel">
-      <div className="auth-tabs">
-        <button
-          className={mode === 'login' ? 'active' : ''}
-          onClick={() => setMode('login')}
+    <>
+      <Typography.Title level={3}>Đăng nhập</Typography.Title>
+      {error && <Alert className="auth-alert" type="error" message={error} showIcon />}
+      <Form layout="vertical" onFinish={onFinish} requiredMark={false} disabled={loading}>
+        <Form.Item
+          label="Tên đăng nhập hoặc email"
+          name="usernameOrEmail"
+          rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập hoặc email.' }]}
         >
+          <Input autoFocus autoComplete="username" />
+        </Form.Item>
+        <Form.Item
+          label="Mật khẩu"
+          name="password"
+          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu.' }]}
+        >
+          <Input.Password autoComplete="current-password" />
+        </Form.Item>
+        <Button type="primary" htmlType="submit" loading={loading} block>
           Đăng nhập
-        </button>
-
-        <button
-          className={mode === 'register' ? 'active' : ''}
-          onClick={() => setMode('register')}
-        >
-          Đăng ký
-        </button>
-      </div>
-
-      <form onSubmit={submit} className="form">
-        {mode === 'register' && (
-          <>
-            <label>
-              Họ và tên
-              <input
-                value={fullName}
-                onChange={(event) =>
-                  setFullName(event.target.value)
-                }
-                required
-              />
-            </label>
-
-            <label>
-              Email
-              <input
-                type="email"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                required
-              />
-            </label>
-
-            <label>
-              Số điện thoại
-              <input
-                value={phoneNumber}
-                onChange={(event) =>
-                  setPhoneNumber(event.target.value)
-                }
-                required
-              />
-            </label>
-          </>
-        )}
-
-        <label>
-          {mode === 'login'
-            ? 'Tên đăng nhập hoặc email'
-            : 'Tên đăng nhập'}
-
-          <input
-            value={username}
-            onChange={(event) =>
-              setUsername(event.target.value)
-            }
-            required
-          />
-        </label>
-
-        <label>
-          Mật khẩu
-          <input
-            type="password"
-            value={password}
-            onChange={(event) =>
-              setPassword(event.target.value)
-            }
-            required
-          />
-        </label>
-
-        <button type="submit" disabled={loading}>
-          {loading
-            ? 'Đang gửi...'
-            : mode === 'login'
-              ? 'Đăng nhập'
-              : 'Tạo tài khoản'}
-        </button>
-      </form>
-
-      {error && <p className="error">{error}</p>}
-
-      {notice && <p className="success">{notice}</p>}
-    </section>
+        </Button>
+      </Form>
+      <p className="auth-switch">
+        Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+      </p>
+    </>
   );
 }

@@ -1,50 +1,48 @@
-import { post } from 'shared/utils'
-import { oauthActions } from 'store'
+import { http } from 'shared/utils/http';
+import { store } from 'store/store';
+import { oauthActions, type AuthTokens } from 'store/oauth.slice';
 
 export type LoginRequest = {
-  usernameOrEmail: string
-  password: string
-  deviceInfo: string
-  ipAddress: string
-}
+  usernameOrEmail: string;
+  password: string;
+};
 
 export type RegisterRequest = {
-  username: string
-  email: string
-  password: string
-  fullName: string
-  phoneNumber: string
-}
+  username: string;
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber: string;
+};
 
-export type AuthResponse = {
-  accessToken: string
-  refreshToken: string
-  expiresInSeconds: number
-}
-
-class AuthService {
+export const authService = {
   async login(data: LoginRequest) {
-    const token = await post<AuthResponse>('/api/auth/login', data)
-    oauthActions.setToken(token)
-    return token
-  }
+    // BE hiện vẫn đọc deviceInfo/ipAddress từ body (cột Browser bắt buộc).
+    // Bỏ 2 trường này khi BE Pha 2 tự lấy từ HttpContext.
+    const tokens = await http.post<AuthTokens>('/api/auth/login', {
+      ...data,
+      deviceInfo: navigator.userAgent,
+      ipAddress: '',
+    });
+    store.dispatch(oauthActions.setToken(tokens));
+    return tokens;
+  },
 
   register(data: RegisterRequest) {
-    return post<{ message: string }>('/api/auth/register', data)
-  }
+    return http.post<{ message: string }>('/api/auth/register', data);
+  },
 
-  async refreshToken(refreshToken: string) {
-    const token = await post<AuthResponse>('/api/auth/refresh-token', { refreshToken })
-    oauthActions.setToken(token)
-    return token
-  }
-
-  async revokeToken(refreshToken: string) {
-    const result = await post<boolean>('/api/auth/revoke-token', refreshToken)
-    oauthActions.removeToken()
-    return result
-  }
-}
-
-export const authService = new AuthService()
-export { AuthService }
+  async logout() {
+    const refreshToken = store.getState().oauth.refreshToken;
+    try {
+      if (refreshToken) {
+        // BE hiện nhận body là chuỗi JSON trần; đổi thành { refreshToken } khi BE Pha 2 sửa contract
+        await http.post('/api/auth/revoke-token', JSON.stringify(refreshToken), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    } finally {
+      store.dispatch(oauthActions.removeToken());
+    }
+  },
+};

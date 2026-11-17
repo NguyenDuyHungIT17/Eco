@@ -1,1298 +1,303 @@
-# ECO_FE - Huong dan su dung va phat trien frontend
+# Hướng dẫn Eco_FE
 
-Tai lieu nay danh cho nguoi da biet Backend nhung chua quen voi Frontend.
-Muc tieu la sau khi doc xong ban co the:
+> Đọc file này khi cần **chạy project, tìm file, thêm trang mới hoặc debug**.
+> Muốn học React từ đầu → [FE_LEARNING_ROADMAP.md](FE_LEARNING_ROADMAP.md).
+> Muốn biết vì sao cấu trúc như thế này → [FE_REFACTOR_PLAN.md](FE_REFACTOR_PLAN.md).
 
-- Chay duoc `Eco_FE` tren may.
-- Hieu mot ung dung React/Vite hoat dong nhu the nao.
-- Hieu du lieu di tu giao dien den API Backend va quay lai.
-- Hieu dung vai tro cua component, module, service, store, router va CSS.
-- Tao mot module moi theo dung cau truc dang dung trong project.
-- Goi API moi ma khong dat sai file hoac sai tang xu ly.
-- Tu tim loi khi giao dien khong hien thi hoac API khong tra ket qua.
+## Mục lục
 
-> Luu y: `Eco_FE` hien la frontend scaffold nho de ket noi cac API auth cua `Eco_BE`.
-> No dang mo phong cach to chuc cua project `Frontends`, nhung chua phai ban sao day du cua toan bo `Frontends`.
-
----
-
-## 1. Frontend la gi neu ban da biet Backend?
-
-Neu Backend la noi xu ly nghiep vu, database va API, thi Frontend la phan chay tren trinh duyet cua nguoi dung.
-
-Co the hieu don gian nhu sau:
-
-```text
-Nguoi dung thao tac
-        |
-        v
-React component (form, button, bang du lieu)
-        |
-        v
-Service (quy dinh goi endpoint nao, gui body gi)
-        |
-        v
-HTTP request qua trinh duyet
-        |
-        v
-Vite proxy trong moi truong dev
-        |
-        v
-Eco_BE API
-        |
-        v
-JSON response
-        |
-        v
-Service -> component state -> React render lai giao dien
-```
-
-Vi du voi dang nhap:
-
-1. Nguoi dung nhap username va password.
-2. Component `modules/auth/Login.tsx` giu gia tri input bang `useState`.
-3. Khi submit form, component goi `authService.login(...)`.
-4. `AuthService` goi ham HTTP chung `post(...)`.
-5. `post(...)` gui `POST /api/auth/login`.
-6. Vite proxy chuyen request den `https://localhost:7038` trong luc development.
-7. Backend tra JSON.
-8. Service luu token vao `localStorage`.
-9. Component nhan ket qua va hien thi trang phien dang nhap.
-
-Trong Frontend, khong nen viet SQL, truy cap database, hoac viet business logic Backend.
-Frontend chi nen:
-
-- Hien thi du lieu.
-- Thu thap input.
-- Goi API.
-- Xu ly loading, success, error.
-- Quan ly trang thai dang dung cua giao dien.
+1. [Chạy project](#1-chạy-project)
+2. [Thư viện đang dùng](#2-thư-viện-đang-dùng)
+3. [Cấu trúc thư mục](#3-cấu-trúc-thư-mục)
+4. [Một request đi như thế nào](#4-một-request-đi-như-thế-nào)
+5. [Đăng nhập & phân quyền](#5-đăng-nhập--phân-quyền)
+6. [Thêm một trang / API mới](#6-thêm-một-trang--api-mới)
+7. [Quy ước code](#7-quy-ước-code)
+8. [Debug](#8-debug)
+9. [Còn tạm / chờ BE](#9-còn-tạm--chờ-be)
 
 ---
 
-## 2. Yeu cau moi truong
+## 1. Chạy project
 
-Can co:
+**Cần có:** Node.js 20+, BE `Eco.Api` chạy profile `https` (cổng `7038`).
 
-- Node.js va npm.
-- Backend `Eco_BE` dang chay neu muon test API that.
-- Trinh duyet hien dai.
-- VS Code.
-
-Kiem tra Node va npm:
-
-```powershell
-node --version
-npm --version
+```bash
+cd Eco_FE
+npm install          # lần đầu
+npm run dev          # mở http://localhost:5173
 ```
 
-Neu chua co `node_modules`, cai dependency tai thu muc `Eco_FE`:
-
-```powershell
-cd D:\Project_Personal\Eco\Eco_FE
-npm install
-```
-
-Khong chay lenh trong thu muc `Eco` neu muon build rieng frontend. Hay dam bao terminal dang o:
-
-```text
-D:\Project_Personal\Eco\Eco_FE
-```
-
----
-
-## 3. Cach chay project
-
-### 3.1. Chay development
-
-```powershell
-cd D:\Project_Personal\Eco\Eco_FE
-npm run dev
-```
-
-Vite se hien mot URL, thuong la:
-
-```text
-http://localhost:5173
-```
-
-Mo URL do tren trinh duyet.
-
-Development server co cac dac diem:
-
-- Tu dong build lai khi ban sua file.
-- Bao loi ngay tren terminal hoac trinh duyet.
-- Su dung proxy trong `vite.config.ts` de goi Backend HTTPS local.
-
-### 3.2. Build production
-
-```powershell
-npm run build
-```
-
-Lenh nay da chay thanh cong trong project hien tai.
-Ket qua duoc tao trong thu muc `dist/`.
-
-Build khac voi dev server:
-
-- Dev server phuc vu code de phat trien.
-- Build tao file toi uu de deploy.
-- Build khong tu dong cho ban xem giao dien.
-
-### 3.3. Xem ban build
-
-```powershell
-npm run preview
-```
-
-Lenh nay phuc vu thu muc `dist` bang mot server local.
-
-### 3.4. Canh bao CJS cua Vite
-
-Neu thay:
-
-```text
-The CJS build of Vite's Node API is deprecated
-```
-
-Day la canh bao tu Vite, khong phai loi compile cua source code.
-Neu van thay dong `built successfully` hoac dau `checkmark`, build da thanh cong.
-
----
-
-## 4. Cau truc thu muc hien tai
-
-Cau truc nguon chinh:
-
-```text
-Eco_FE/
-|-- package.json
-|-- tsconfig.json
-|-- vite.config.ts
-|-- index.html
-|-- ECO_FE_GUIDE.md
-`-- src/
-    |-- main.tsx
-    |-- App.tsx
-    |-- AppRoutes.tsx
-    |-- app-setting.ts
-    |-- styles.css
-    |-- layouts/
-    |   |-- MainLayout.tsx
-    |   `-- index.ts
-    |-- modules/
-    |   |-- auth/
-    |   |   |-- Login.tsx
-    |   |   `-- index.ts
-    |   `-- home/
-    |       |-- Dashboard.tsx
-    |       `-- index.ts
-    |-- shared/
-    |   |-- services/
-    |   |   |-- AuthService.ts
-    |   |   `-- index.ts
-    |   `-- utils/
-    |       |-- http.ts
-    |       `-- index.ts
-    `-- store/
-        |-- oauth.slice.ts
-        `-- index.ts
-```
-
-### 4.1. `main.tsx`: diem khoi dong
-
-`src/main.tsx` la entry point cua ung dung.
-No lam ba viec:
-
-1. Import React.
-2. Tim phan tu HTML co id `root`.
-3. Render component `App` vao phan tu do.
-4. Import CSS toan cuc.
-
-```tsx
-createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
-```
-
-`StrictMode` giup phat hien mot so van de trong luc development.
-No khong phai la mot giao dien va khong can tu sua neu ban chua hieu ro.
-
-### 4.2. `App.tsx`: root component
-
-`App.tsx` la component goc cua giao dien:
-
-```tsx
-export default function App() {
-  return <div className="app"><AppRoutes /></div>;
-}
-```
-
-Khong nen dat logic goi API lon vao `App.tsx`.
-App nen lam nhiem vu ghep cac tang lon cua ung dung.
-
-### 4.3. `AppRoutes.tsx`: cua vao routing
-
-Hien tai file nay tra ve `MainLayout`:
-
-```tsx
-export function AppRoutes() {
-  return <MainLayout />;
-}
-```
-
-Project mau `Frontends` dung React Router va lazy module.
-`Eco_FE` hien chua cai React Router, nen `AppRoutes` dang la lop trung gian de sau nay them route ma khong phai sua `App.tsx`.
-
-Khi can them route that, co the cai router va chuyen logic vao file nay.
-Khong nen import truc tiep tat ca page vao `App.tsx`.
-
-### 4.4. `layouts/`: khung dung chung
-
-`layouts/MainLayout.tsx` chua bo cuc lon:
-
-- Header.
-- Khu vuc noi dung chinh.
-- Module trang home.
-- Module auth.
-
-Layout khong nen chua chi tiet cua tung nghiep vu.
-Vi du, layout co the chua menu va header, nhung form tao san pham nen dat trong module san pham.
-
-### 4.5. `modules/`: chia theo nghiep vu
-
-Day la thu muc quan trong nhat khi lam theo phong cach `Frontends`.
-
-Moi module nen dai dien cho mot khu vuc nghiep vu:
-
-```text
-modules/
-|-- auth/
-|-- home/
-|-- nguoi-dung/
-|-- san-pham/
-`-- don-hang/
-```
-
-Trong project hien tai:
-
-- `modules/auth/Login.tsx`: dang nhap, dang ky, refresh token, dang xuat.
-- `modules/home/Dashboard.tsx`: noi dung gioi thieu trang chu.
-
-Khong nen dat file `UserService.ts` vao `modules/auth` neu service do duoc dung boi nhieu man hinh.
-Service dung chung nen dat trong `shared/services`.
-
-### 4.6. `shared/services/`: noi goi API
-
-Service la lop trung gian giua component va HTTP.
-
-`shared/services/AuthService.ts` chua:
-
-- Kieu du lieu request/response cua auth.
-- Ham `login`.
-- Ham `register`.
-- Ham `refreshToken`.
-- Ham `revokeToken`.
-
-Component khong nen tu ghep URL API o nhieu noi.
-Neu endpoint thay doi, chi sua service.
-
-### 4.7. `shared/utils/`: ham dung chung
-
-`shared/utils/http.ts` chua ham `post<T>` dung chung.
-No lo cac viec lap lai:
-
-- Tao request POST.
-- Gan `Content-Type: application/json`.
-- Serialize body bang `JSON.stringify`.
-- Parse JSON response.
-- Kiem tra HTTP status.
-- Kiem tra truong `success` cua response.
-- Gom message va errors thanh Error.
-
-Component khong can lap lai nhung viec nay.
-
-### 4.8. `store/`: trang thai dung chung
-
-`store/oauth.slice.ts` dang quan ly token auth o muc don gian:
-
-- `oauthActions.setToken(token)`: luu token vao bien trong bo nho va `localStorage`.
-- `oauthActions.removeToken()`: xoa token.
-- `getToken()`: doc token da luu.
-
-Day la store tu viet nho, chua phai Redux store day du nhu project `Frontends`.
-Neu sau nay co nhieu trang thai dung chung, co the chuyen sang Redux Toolkit theo mau `Frontends`.
-
-### 4.9. `styles.css`: CSS toan ung dung
-
-CSS dang duoc import mot lan trong `main.tsx`, nen cac class co the dung tren cac component.
-
-Quy uoc hien tai:
-
-- Bien mau dat trong `:root`.
-- Class dat theo vai tro giao dien.
-- Media query dat o cuoi file.
-- Khong dat CSS truc tiep trong service.
-- Khong dung ten class qua chung chung neu de trung voi module khac.
-
----
-
-## 5. Alias import va vi sao khong dung dau `../`
-
-Trong project nay co the viet:
-
-```tsx
-import MainLayout from 'layouts';
-import Login from 'modules/auth';
-import { authService } from 'shared/services';
-import { oauthActions } from 'store';
-```
-
-Thay vi:
-
-```tsx
-import MainLayout from '../layouts/MainLayout';
-import Login from '../../modules/auth/Login';
-```
-
-Cac alias duoc khai bao trong hai noi:
-
-1. `tsconfig.json`: de TypeScript hieu duong dan.
-2. `vite.config.ts`: de Vite/Rollup resolve duong dan khi build.
-
-Alias hien co:
-
-```text
-app-setting -> src/app-setting.ts
-layouts     -> src/layouts
-modules     -> src/modules
-shared      -> src/shared
-store       -> src/store
-```
-
-Khi tao alias moi, phai cap nhat ca hai cau hinh.
-Neu chi sua mot noi, editor co the khong bao loi nhung build se fail, hoac nguoc lai.
-
-Quy tac de nho:
-
-- Import noi bo theo alias neu import tu module khac.
-- Import file cung module co the dung duong dan tuong doi.
-- Khong tao alias cho tung file nho neu khong can.
-
----
-
-## 6. Hieu React component
-
-React component la ham tra ve giao dien.
-
-Vi du:
-
-```tsx
-export default function Dashboard() {
-  return (
-    <section className="auth-intro">
-      <h1>Chao mung den Eco</h1>
-    </section>
-  );
-}
-```
-
-JSX trong React trong gan giong HTML, nhung co mot so quy tac:
-
-- Dung `className`, khong dung `class`.
-- Thuoc tinh JavaScript viet theo camelCase: `onClick`, `autoComplete`.
-- Moi component phai tra ve mot root element, hoac Fragment `<>...</>`.
-- JavaScript chen vao JSX bang `{}`.
-- Event handler nhan mot ham, khong goi ham ngay khi render.
-
-Dung:
-
-```tsx
-<button onClick={logout}>Dang xuat</button>
-```
-
-Khong dung:
-
-```tsx
-<button onClick={logout()}>Dang xuat</button>
-```
-
-Vi dong sai se goi `logout` ngay khi component render.
-
----
-
-## 7. State: du lieu ma giao dien dang nho
-
-Trong `Login.tsx`, moi input co state:
-
-```tsx
-const [username, setUsername] = useState('');
-```
-
-Co the doc nhu sau:
-
-- `username`: gia tri hien tai.
-- `setUsername`: ham cap nhat gia tri.
-- `useState('')`: gia tri ban dau la chuoi rong.
-
-Input controlled:
-
-```tsx
-<input
-  value={username}
-  onChange={(event) => setUsername(event.target.value)}
-/>
-```
-
-Dong du lieu:
-
-```text
-Nguoi dung go phim
-    -> onChange
-    -> setUsername
-    -> React cap nhat state
-    -> component render lai
-    -> input hien gia tri moi
-```
-
-State local phu hop cho:
-
-- Gia tri form.
-- Loading cua mot nut.
-- Loi cua mot form.
-- Tab dang chon.
-- Dialog dang mo hay dong.
-
-Store dung chung phu hop cho:
-
-- Token dang nhap.
-- User hien tai.
-- Theme.
-- Danh sach can dung o nhieu module.
-
-Khong dua moi thu vao store. State chi dung trong mot component thi de local se don gian hon.
-
----
-
-## 8. Doc Login.tsx tu tren xuong
-
-### 8.1. Import
-
-```tsx
-import { useState } from 'react';
-import {
-  authService,
-  type AuthResponse,
-  type RegisterRequest,
-} from 'shared/services';
-```
-
-- `useState`: hook cua React.
-- `authService`: doi tuong goi API.
-- `AuthResponse`, `RegisterRequest`: type TypeScript, chi dung de kiem tra code.
-- Tu khoa `type` giup phan biet import type voi import runtime.
-
-### 8.2. State mode
-
-```tsx
-const [mode, setMode] = useState<'login' | 'register'>('login');
-```
-
-Type union buoc `mode` chi co the la `login` hoac `register`.
-Day la loi ich lon cua TypeScript: tranh go nham chuoi tuy y.
-
-### 8.3. Submit form
-
-```tsx
-async function submit(event: React.FormEvent) {
-  event.preventDefault();
-  setLoading(true);
-  setError('');
-  setNotice('');
-
-  try {
-    // goi API
-  } catch (submitError) {
-    // hien loi
-  } finally {
-    setLoading(false);
-  }
-}
-```
-
-Trinh tu dung:
-
-1. Chan trinh duyet reload trang bang `preventDefault()`.
-2. Bat loading de tranh bam nhieu lan.
-3. Xoa loi va thong bao cu.
-4. Goi API trong `try`.
-5. Hien loi trong `catch`.
-6. Tat loading trong `finally`, ke ca khi API loi.
-
-Day la mau xu ly can dung cho hau het form goi API.
-
-### 8.4. Dang ky
-
-Payload phai trung contract BE:
-
-```tsx
-const data: RegisterRequest = {
-  username,
-  email,
-  password,
-  fullName,
-  phoneNumber,
-};
-
-const result = await authService.register(data);
-```
-
-Khong tu y doi ten `fullName` thanh `name` neu Backend dang nhan `fullName`.
-Frontend type khong tu dong sua contract Backend.
-
-### 8.5. Dang nhap
-
-```tsx
-const result = await authService.login({
-  usernameOrEmail: username,
-  password,
-  deviceInfo: navigator.userAgent,
-  ipAddress: '',
-});
-```
-
-`navigator.userAgent` la thong tin trinh duyet.
-`ipAddress` dang gui chuoi rong de Backend tu xu ly hoac bo qua theo contract hien tai.
-
-### 8.6. Loading va error
-
-Trong luc request:
-
-```tsx
-<button type="submit" disabled={loading}>
-  {loading ? 'Dang gui...' : 'Dang nhap'}
-</button>
-```
-
-Nguyen tac:
-
-- Request bat dau: `loading = true`.
-- Request ket thuc: `loading = false`.
-- Loi phai duoc hien thi cho nguoi dung.
-- Khong de loi chi xuat hien trong console ma khong co thong bao tren giao dien.
-
----
-
-## 9. Contract API auth hien tai
-
-`AuthService.ts` dang goi cac endpoint:
-
-| Nghiep vu | Method | URL | Body |
-|---|---|---|---|
-| Dang ky | POST | `/api/auth/register` | `username`, `email`, `password`, `fullName`, `phoneNumber` |
-| Dang nhap | POST | `/api/auth/login` | `usernameOrEmail`, `password`, `deviceInfo`, `ipAddress` |
-| Lam moi token | POST | `/api/auth/refresh-token` | `{ refreshToken }` |
-| Thu hoi token | POST | `/api/auth/revoke-token` | Chuoi JSON la refresh token |
-
-Diem can chu y: `revoke-token` dang gui refresh token truc tiep lam JSON string:
-
-```tsx
-post<boolean>('/api/auth/revoke-token', refreshToken);
-```
-
-Khong tu y doi thanh:
-
-```tsx
-post<boolean>('/api/auth/revoke-token', { refreshToken });
-```
-
-Tru khi contract Backend duoc sua.
-
-### 9.1. Dang ky
-
-```json
-{
-  "username": "nguyen.van.a",
-  "email": "a@example.com",
-  "password": "mat-khau",
-  "fullName": "Nguyen Van A",
-  "phoneNumber": "0900000000"
-}
-```
-
-### 9.2. Dang nhap
-
-```json
-{
-  "usernameOrEmail": "nguyen.van.a",
-  "password": "mat-khau",
-  "deviceInfo": "Mozilla/5.0 ...",
-  "ipAddress": ""
-}
-```
-
-### 9.3. Response wrapper
-
-`http.ts` ky vong response co dang gan nhu:
-
-```json
-{
-  "success": true,
-  "message": "Dang nhap thanh cong",
-  "data": {
-    "accessToken": "...",
-    "refreshToken": "...",
-    "expiresInSeconds": 3600
-  },
-  "errors": []
-}
-```
-
-Neu BE tra `success: false`, `http.ts` se nem `Error` de component xu ly.
-
-Neu BE tra status khac 2xx, request cung bi coi la loi.
-
----
-
-## 10. Vite proxy va loi CORS
-
-Trong `vite.config.ts`:
-
-```ts
-server: {
-  proxy: {
-    '/api': {
-      target: 'https://localhost:7038',
-      changeOrigin: true,
-      secure: false,
-    },
-  },
-},
-```
-
-Khi frontend goi:
-
-```text
-/api/auth/login
-```
-
-Trinh duyet gui den Vite dev server, sau do Vite chuyen tiep den:
-
-```text
-https://localhost:7038/api/auth/login
-```
-
-`secure: false` cho phep Vite chap nhan certificate HTTPS local tu Backend.
-Chi nen dung cai nay cho development, khong coi day la cau hinh bao mat production.
-
-Neu chay frontend bang `npm run dev`, proxy co tac dung.
-Neu deploy frontend len mot domain khac, can mot trong cac cach:
-
-- Cau hinh reverse proxy tren server.
-- Cau hinh CORS o Backend.
-- Dat `VITE_API_BASE` thanh origin Backend phu hop.
-
-Loi thuong gap:
-
-| Loi | Nguyen nhan kha nang cao |
+| Lệnh | Làm gì |
 |---|---|
-| `Failed to fetch` | BE chua chay, sai port, certificate, CORS |
-| `404` | Sai path endpoint hoac proxy khong chuyen dung |
-| `401` | Token thieu, sai, het han |
-| `400` | Body khong dung contract/validator |
-| `500` | Loi phia Backend |
+| `npm run dev` | Chạy dev, sửa code là trình duyệt tự cập nhật |
+| `npm run build` | Kiểm tra kiểu (`tsc`) rồi build ra `dist/` |
+| `npm run preview` | Xem thử bản build |
+| `npm run lint` | Bắt lỗi code (ESLint) |
+| `npm run format` | Tự format code (Prettier) |
+| `npm test` | Chạy test (Vitest) |
+
+**Biến môi trường** (`.env`, copy từ `.env.example`):
+
+| Biến | Giá trị | Ghi chú |
+|---|---|---|
+| `VITE_API_BASE` | để trống | Dev đi qua proxy của Vite. Chỉ điền khi build cho máy chủ thật / mobile |
+
+> **Proxy:** [vite.config.ts](vite.config.ts) chuyển mọi request `/api/...` sang `https://localhost:7038`.
+> Nhờ vậy FE và BE coi như "cùng địa chỉ" → không bị lỗi CORS khi dev.
 
 ---
 
-## 11. Quy trinh them mot API moi
+## 2. Thư viện đang dùng
 
-Gia su BE co API lay danh sach san pham:
-
-```text
-GET /api/products?page=1&pageSize=20
-```
-
-Lam theo cac buoc sau.
-
-### Buoc 1: Xac nhan contract Backend
-
-Can biet:
-
-- HTTP method.
-- URL.
-- Query string.
-- Request body.
-- Header can gui.
-- Response wrapper.
-- Response data.
-- Cac loi validator.
-
-Khong bat dau viet UI khi chua biet contract.
-
-### Buoc 2: Tao service dung module phu hop
-
-Neu chi dung trong module products, co the tao:
-
-```text
-src/modules/products/ProductsService.ts
-```
-
-Neu duoc nhieu module dung, tao:
-
-```text
-src/shared/services/ProductService.ts
-```
-
-Khong dat request API vao file `Dashboard.tsx` neu API do con duoc dung o noi khac.
-
-### Buoc 3: Mo rong HTTP helper neu can
-
-Hien `shared/utils/http.ts` moi co `post`.
-Voi GET, them ham co cung cach xu ly response:
-
-```ts
-import { API_BASE_URL } from 'app-setting';
-
-type ApiResponse<T> = {
-  success?: boolean;
-  message?: string;
-  data?: T;
-  errors?: string[];
-};
-
-export async function get<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  const body = await response.json().catch(() => null) as ApiResponse<T> | null;
-
-  if (!response.ok || !body?.success || body.data === undefined) {
-    throw new Error(
-      [body?.message, ...(body?.errors || [])]
-        .filter(Boolean)
-        .join(' ') || 'Yeu cau khong thanh cong.',
-    );
-  }
-
-  return body.data;
-}
-```
-
-Trong source that, hay giu format va helper da co thay vi copy logic vao tung service.
-
-### Buoc 4: Tao type response
-
-```ts
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-};
-
-type ProductListResponse = {
-  items: Product[];
-  totalCount: number;
-};
-```
-
-Type giup editor goi y ten field va bao loi khi dung sai.
-
-### Buoc 5: Tao service
-
-```ts
-import { get } from 'shared/utils';
-
-export function getProducts() {
-  return get<ProductListResponse>('/api/products?page=1&pageSize=20');
-}
-```
-
-### Buoc 6: Tao module
-
-```text
-src/modules/products/
-|-- ProductsService.ts
-|-- ProductsPage.tsx
-`-- index.ts
-```
-
-`index.ts`:
-
-```ts
-export { default } from './ProductsPage';
-```
-
-### Buoc 7: Goi service tu component bang state
-
-```tsx
-import { useEffect, useState } from 'react';
-import { getProducts, type Product } from './ProductsService';
-
-export default function ProductsPage() {
-  const [items, setItems] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    async function load() {
-      try {
-        setItems((await getProducts()).items);
-      } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : 'Khong tai duoc du lieu.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void load();
-  }, []);
-
-  if (loading) return <p>Dang tai...</p>;
-  if (error) return <p className="error">{error}</p>;
-
-  return (
-    <ul>
-      {items.map((item) => (
-        <li key={item.id}>{item.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-### Buoc 8: Them vao route/layout
-
-Hien `AppRoutes` chua router that, nen co the tam import module vao `MainLayout`.
-Khi dung React Router, them route trong `AppRoutes.tsx`, theo phong cach project `Frontends`:
-
-```tsx
-{
-  path: 'products/*',
-  lazy: () => import('modules/products'),
-}
-```
+| Thư viện | Vai trò | Tương đương bên .NET |
+|---|---|---|
+| `react` | Vẽ giao diện bằng component | Razor View |
+| `react-router-dom` | Đổi trang theo URL | `[Route]` / routing |
+| `@reduxjs/toolkit` + `react-redux` | Dữ liệu dùng chung toàn app (token, profile) | Singleton service |
+| `redux-persist` | Lưu store vào `localStorage` → F5 không mất | Cookie / session |
+| `axios` | Gọi API | `HttpClient` |
+| `antd` + `@ant-design/icons` | Bộ component có sẵn: Form, Table, Button, Modal… | Bộ control UI |
+| `@casl/ability` + `@casl/react` | Kiểm tra quyền, ẩn/hiện nút | `[Authorize(Policy)]` (phía giao diện) |
+| `jwt-decode` | Đọc nội dung access token | — |
+| `dayjs` | Xử lý ngày giờ | `DateTime` |
 
 ---
 
-## 12. Quy trinh tao form ghi du lieu
+## 3. Cấu trúc thư mục
 
-Mau chuan:
+```
+src/
+├── main.tsx            Điểm khởi động: render <App/>, nạp CSS
+├── App.tsx             Bọc các "provider": Redux, persist, antd (tiếng Việt), quyền, router
+├── AppRoutes.tsx       Danh sách URL → trang nào
+├── app-setting.ts      Đọc biến môi trường (API_BASE_URL)
+│
+├── layouts/            Khung trang
+│   ├── MainLayout.tsx    Header + Sider + nội dung. Chưa đăng nhập → đá về /login
+│   ├── AuthLayout.tsx    Khung trang login/register. Đã đăng nhập → về /
+│   ├── menu.tsx          Khai báo menu bên trái (1 chỗ duy nhất)
+│   ├── headers/Header.tsx   Logo + tên người dùng + Đăng xuất
+│   └── siderbars/Sider.tsx  Menu, tự lọc theo quyền
+│
+├── modules/            Mỗi nghiệp vụ một thư mục
+│   ├── auth/             Login.tsx, Register.tsx, Const.ts (câu báo lỗi tiếng Việt)
+│   ├── logout/           Gọi revoke-token rồi về /login
+│   └── home/             Dashboard.tsx
+│
+├── shared/             Dùng chung cho mọi module
+│   ├── types/api.ts      ApiResponse<T>, PagedResult<T>, ApiError — khớp với BE
+│   ├── utils/http/       httpClient.ts: axios + gắn token + tự refresh
+│   ├── services/         BaseService (CRUD chung), AuthService, CaslService (quyền)
+│   └── components/       PermButton, NotFoundPage, FallbackElement
+│
+├── store/              Redux
+│   ├── oauth.slice.ts    Token + profile + roles + permissions
+│   ├── store.ts          Tạo store, cấu hình persist
+│   ├── reducers.ts       Gộp các slice
+│   └── hooks.ts          useAppSelector / useAppDispatch (đã có kiểu)
+│
+└── styles/global.css   CSS toàn app
+```
 
-1. Tao type request.
-2. Tao state cho moi input.
-3. Tao ham submit.
-4. Chan reload bang `preventDefault()`.
-5. Bat loading.
-6. Tao payload dung ten field BE.
-7. Goi service.
-8. Hien thong bao thanh cong.
-9. Bat loi va hien loi.
-10. Tat loading trong `finally`.
+**Import bằng alias**, không dùng `../../`:
 
-Vi du ngan:
+```ts
+import { http } from 'shared/utils/http';
+import { useAppSelector } from 'store/hooks';
+```
+
+Alias khai báo ở **2 nơi** và phải giống nhau: [tsconfig.json](tsconfig.json) (`paths`) và [vite.config.ts](vite.config.ts) (`resolve.alias`).
+
+---
+
+## 4. Một request đi như thế nào
+
+Ví dụ: bấm **Đăng nhập**.
+
+```
+Login.tsx            người dùng bấm nút → gọi authService.login(values)
+   ↓
+AuthService.ts       http.post('/api/auth/login', data) → nhận token → dispatch(setToken)
+   ↓
+httpClient.ts        gắn header Bearer, gửi request
+   ↓  Vite proxy
+BE  POST /api/auth/login  → trả ApiResponse { success, data, errorCode, ... }
+   ↓
+httpClient.ts        thành công: trả về phần `data`
+                     thất bại:   ném ApiError(status, message, errorCode, errors)
+   ↓
+Login.tsx            thành công: chuyển trang · thất bại: getAuthErrorMessage(err) → hiện Alert
+```
+
+**3 việc `httpClient` làm sẵn — module không phải tự làm:**
+
+1. Gắn `Authorization: Bearer <accessToken>` vào mọi request.
+2. Gặp **401** → gọi `refresh-token` **đúng 1 lần** (nhiều request cùng lỗi thì chờ chung), rồi gửi lại request cũ. Refresh hỏng → đăng xuất.
+   Các URL `/api/auth/*` được bỏ qua (vì đăng nhập sai cũng trả 401).
+3. Bóc `ApiResponse` → component nhận thẳng dữ liệu.
+
+**Khớp với BE ở 5 điểm:**
+
+| # | Điểm nối | BE | FE |
+|:-:|---|---|---|
+| ① | Địa chỉ | `[Route]` + `[HttpPost("login")]` | URL trong Service |
+| ② | Dữ liệu gửi | `LoginRequestDto` (PascalCase) | `interface LoginRequest` (camelCase) |
+| ③ | Dữ liệu nhận | `ApiResponse<AuthResponseDto>` | `ApiResponse<AuthTokens>` trong `shared/types` |
+| ④ | Lỗi | HTTP status + `errorCode` | `ApiError.errorCode` → câu tiếng Việt trong `Const.ts` |
+| ⑤ | Quyền | Claim `role`, `permission` trong JWT + `[Authorize]` | `oauth.slice` giải mã → CASL ẩn/hiện |
+
+> Thêm field vào DTO bên BE thì **phải tự thêm** vào interface bên FE — không có gì tự đồng bộ.
+
+---
+
+## 5. Đăng nhập & phân quyền
+
+**Lưu ở đâu?** `store.oauth` (Redux), được `redux-persist` ghi vào `localStorage` key `persist:eco`.
+
+| Trường | Lấy từ |
+|---|---|
+| `accessToken`, `refreshToken` | Response login / refresh |
+| `profile` `{ id, username, email }` | Giải mã JWT: `sub`, `unique_name`, `email` |
+| `roles` | Claim `role` |
+| `permissions` | Claim `permission` |
+
+**Đọc trong component:**
 
 ```tsx
-const [name, setName] = useState('');
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState('');
+const { profile, permissions } = useAppSelector((s) => s.oauth);
+```
 
-async function submit(event: React.FormEvent) {
-  event.preventDefault();
-  setLoading(true);
-  setError('');
+**Bảo vệ trang:** mọi route con của `MainLayout` đều cần đăng nhập. Chưa đăng nhập → `/login?returnUrl=<trang đang mở>`, đăng nhập xong quay lại đúng trang đó.
 
-  try {
-    await productService.create({ name });
-  } catch (submitError) {
-    setError(
-      submitError instanceof Error
-        ? submitError.message
-        : 'Khong luu duoc.',
-    );
-  } finally {
-    setLoading(false);
+**Ẩn/hiện theo quyền** — mã quyền dạng `<module>.<hành-động>`, ví dụ `admin.nguoi-dung.xem`:
+
+```tsx
+// Nút tự ẩn khi không có quyền
+<PermButton perm="admin.nguoi-dung.them" type="primary">Thêm</PermButton>
+
+// Ẩn một khối bất kỳ
+<Can I="admin.nguoi-dung.xoa" a="all">
+  <Button danger>Xóa</Button>
+</Can>
+
+// Menu: khai báo permission là Sider tự lọc
+{ path: '/admin/nguoi-dung', title: 'Người dùng', permission: 'admin.nguoi-dung.xem' }
+```
+
+> ⚠️ Ẩn ở FE chỉ để giao diện gọn, **không phải bảo mật**. BE luôn phải kiểm tra quyền lại.
+
+---
+
+## 6. Thêm một trang / API mới
+
+Ví dụ: trang **Người dùng** gọi `GET /api/admin/nguoi-dung`.
+
+**Bước 0 — BE trước.** Làm API, mở Swagger gọi thử, **chép lại JSON trả về**.
+
+**Bước 1 — Tạo thư mục module** theo mẫu 6 file:
+
+```
+modules/admin/nguoi-dung/
+├── Const.ts      Kiểu dữ liệu + mã quyền
+├── Service.ts    Gọi API
+├── List.tsx      Bảng danh sách
+├── Form.tsx      Form thêm / sửa (Modal)
+├── Module.tsx    Ghép List + Form
+└── index.ts      export { Component }
+```
+
+**Bước 2 — `Const.ts`:** viết interface theo đúng JSON đã chép.
+
+```ts
+export interface User { id: string; username: string; email: string; isActive: boolean; }
+
+export const Permission = {
+  VIEW: 'admin.nguoi-dung.xem',
+  CREATE: 'admin.nguoi-dung.them',
+  EDIT: 'admin.nguoi-dung.sua',
+  DELETE: 'admin.nguoi-dung.xoa',
+};
+```
+
+**Bước 3 — `Service.ts`:** CRUD có sẵn nhờ `BaseService`, chỉ viết thêm API đặc biệt.
+
+```ts
+import { BaseService } from 'shared/services/BaseService';
+import type { User } from './Const';
+
+class UserService extends BaseService<User> {
+  constructor() { super('/api/admin/nguoi-dung'); }
+
+  lock(id: string) {
+    return this.http.post<boolean>(`${this.url}/${id}/lock`);
   }
 }
+export const userService = new UserService();
 ```
 
-Khong de `loading` chi bat ma khong tat.
-Neu quen `finally`, khi API loi nut co the bi khoa mai.
+**Bước 4 — Trang:** gọi service, đổ vào component antd. Mẫu đầy đủ List/Form xem [FE_REFACTOR_PLAN.md mục 5](FE_REFACTOR_PLAN.md#5-mẫu-một-module-crud).
 
----
-
-## 13. Quy uoc format source code
-
-Project hien co TypeScript/TSX va dang dung semicolon trong mot so file da duoc format.
-Khi sua file, hay giu style cua file do.
-
-### 13.1. Dat ten
-
-- Component React: PascalCase, vi du `ProductsPage.tsx`.
-- Service: PascalCase, vi du `ProductService.ts`.
-- Ham: camelCase, vi du `getProducts`.
-- Type: PascalCase, vi du `ProductResponse`.
-- Bien: camelCase.
-- Module folder: ten nghiep vu ngan gon, vi du `products`.
-- File barrel: `index.ts` de export public API cua module.
-
-### 13.2. Import
-
-Nhom import theo thu tu:
-
-1. React va thu vien ben ngoai.
-2. Alias noi bo.
-3. Relative import trong cung module.
-
-Vi du:
+**Bước 5 — Đăng ký route** trong [AppRoutes.tsx](src/AppRoutes.tsx), bên trong `children` của `MainLayout`:
 
 ```tsx
-import { useEffect, useState } from 'react';
-
-import { getProducts } from 'shared/services';
-import { formatCurrency } from 'shared/utils';
-
-import ProductRow from './ProductRow';
+{ path: 'admin/nguoi-dung', lazy: () => import('modules/admin/nguoi-dung') },
 ```
 
-### 13.3. Component
+**Bước 6 — Thêm menu** trong [layouts/menu.tsx](src/layouts/menu.tsx) (kèm `permission`).
 
-- Moi component co mot nhiem vu ro rang.
-- Page/module dieu phoi state va service.
-- Component con nhan du lieu qua props.
-- Khong goi API trong component nho neu page da co the quan ly request.
+**Bước 7 — Lỗi riêng:** nếu BE có `errorCode` mới, thêm câu tiếng Việt tương ứng.
 
-### 13.4. Comment
-
-Chi viet comment khi can giai thich ly do hoac mot doan logic kho.
-
-Nen:
-
-```tsx
-/*
- * Neu da dang nhap, hien thao tac quan ly phien.
- */
-```
-
-Khong nen:
-
-```tsx
-// Gan loading bang true
-setLoading(true);
-```
-
-Vi code da tu giai thich.
-
-### 13.5. JSX dai
-
-Khi JSX dai, format moi prop tren mot dong.
-Dieu nay de doc va de review hon:
-
-```tsx
-<input
-  type="email"
-  value={email}
-  onChange={(event) => setEmail(event.target.value)}
-  required
-/>
-```
-
-### 13.6. Kiem tra sau moi thay doi
-
-Sau khi sua code:
-
-```powershell
-npm run build
-```
-
-Neu build fail, doc loi dau tien trong terminal, sua loi do truoc.
-Khong sua ngau nhien nhieu file cung luc.
+**Bước 8 — Kiểm tra:** `npm run lint` · `npm run build` · mở trình duyệt thử.
 
 ---
 
-## 14. Cach debug tu Backend sang Frontend
+## 7. Quy ước code
 
-### 14.1. Xac dinh request co duoc gui khong
+| Loại | Quy ước | Ví dụ |
+|---|---|---|
+| Component, file component | PascalCase | `Login.tsx`, `PermButton` |
+| Biến, hàm, field JSON | camelCase | `accessToken`, `getMany` |
+| Hằng số | UPPER_SNAKE | `API_BASE_URL` |
+| Thư mục module | kebab-case, theo nghiệp vụ | `admin/nguoi-dung` |
+| Mã quyền | `<module>.<hành-động>` | `admin.vai-tro.sua` |
 
-Mo DevTools trong trinh duyet:
-
-1. Bam `F12`.
-2. Mo tab `Network`.
-3. Thuc hien thao tac tren giao dien.
-4. Tim request `/api/auth/login`.
-5. Kiem tra `Request Payload`.
-6. Kiem tra `Status Code`.
-7. Kiem tra tab `Response`.
-
-### 14.2. Neu khong thay request
-
-Kha nang:
-
-- Button khong nam trong form.
-- `onSubmit` chua gan.
-- Component chua duoc render.
-- JavaScript loi truoc khi submit.
-- Button dang bi `disabled`.
-
-Xem tab `Console`.
-
-### 14.3. Neu request co nhung bi 400
-
-So sanh payload voi DTO/validator BE:
-
-- Ten field co dung khong?
-- Field co bi thieu khong?
-- Kieu du lieu co dung khong?
-- Email va phone co dung format khong?
-- Password co du do dai khong?
-
-### 14.4. Neu bi 401
-
-- Access token co ton tai khong?
-- Header `Authorization` da gan chua?
-- Token co het han khong?
-- Refresh token co con hop le khong?
-- Backend co dung scheme `Bearer` khong?
-
-Luu y: HTTP helper hien tai chua tu dong gan `Authorization` cho moi request.
-Khi them API can auth, can mo rong helper/service de gui:
-
-```ts
-headers: {
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${accessToken}`,
-}
-```
-
-### 14.5. Neu bi CORS hoac Failed to fetch
-
-Kiem tra theo thu tu:
-
-1. BE co dang chay khong?
-2. Port trong `vite.config.ts` co dung khong?
-3. Backend co redirect HTTP sang HTTPS khong?
-4. Certificate local co hop le khong?
-5. Request co di qua proxy khong?
-6. Neu deploy that, Backend da cau hinh CORS chua?
+- **Trang** export `function Component()` — router `lazy` cần đúng tên này.
+- **Gọi API** chỉ qua Service, không gọi `axios` trực tiếp trong component.
+- **Đọc store** bằng `useAppSelector`, không dùng `useSelector` trơn (mất kiểu).
+- **Thông báo** dùng `App.useApp().message` / `modal` của antd, không dùng `alert()`.
+- **Format:** để Prettier lo (nháy đơn, có `;`, tối đa 100 ký tự/dòng). Chạy `npm run format`.
+- **Comment:** viết tiếng Việt, chỉ giải thích "vì sao", không mô tả lại code.
+- **Trước khi commit:** `npm run lint && npm run build && npm test` phải qua hết.
 
 ---
 
-## 15. Nhung dieu can biet ve ban hien tai
+## 8. Debug
 
-Day la cac diem hien tai ban nen biet truoc khi phat trien tiep.
+Mở **F12 → tab Network**, bấm vào request lỗi, xem *Headers / Payload / Response*:
 
-### 15.1. Token duoc luu nhung giao dien chua khoi phuc token
+| Thấy gì | Nguyên nhân hay gặp | Sửa ở |
+|---|---|---|
+| Không có request nào | Nút không gọi hàm, form không submit, lỗi JS trước đó | Tab **Console**, component |
+| `404` | Sai URL hoặc method | Service ↔ `[Route]` bên BE |
+| `400` + `VALIDATION_ERROR` | Thiếu field / sai tên field (xem `errors`) | Payload ↔ DTO + Validator |
+| `401` ở API thường | Thiếu token, refresh token hết hạn | Đăng nhập lại; xem tab Application → Local Storage → `persist:eco` |
+| `401` ở login | Sai tài khoản/mật khẩu (bình thường) | — |
+| `403` | Không có quyền / tài khoản bị khóa | Quyền của user bên BE |
+| `500` / `ECONNREFUSED` trong terminal Vite | BE chưa chạy hoặc lỗi server | Chạy BE profile `https`; xem log BE |
+| Lỗi CORS | Gọi thẳng BE thay vì qua proxy | Để trống `VITE_API_BASE` khi dev |
+| Dữ liệu trả về đúng nhưng màn hình trống | Đọc sai tên field (`UserName` vs `userName`) | Interface trong `Const.ts` |
 
-`oauth.slice.ts` co `getToken()` de doc token tu `localStorage`.
-Tuy nhien `Login.tsx` hien khoi tao state:
-
-```tsx
-const [token, setToken] = useState<AuthResponse | null>(null);
-```
-
-Vi vay sau khi reload trang, giao dien co the quay ve man hinh login du token van con trong localStorage.
-Day la viec can bo sung neu muon giu phien dang nhap sau reload:
-
-```tsx
-const [token, setToken] = useState<AuthResponse | null>(() => getToken());
-```
-
-Khi ap dung, import `getToken` tu `store`.
-Can them xu ly token het han trong ban production.
-
-### 15.2. HTTP helper moi co POST
-
-Hien tai `shared/utils/http.ts` moi co `post`.
-Khi viet man hinh danh sach, can them `get`.
-Khi upload file, can them helper cho `FormData` va khong gan `Content-Type` bang tay.
-
-### 15.3. Chua co Authorization tu dong
-
-Login luu token nhung cac request khac chua tu dong doc token va gan Bearer header.
-Do do, truoc khi viet API can quyen, phai bo sung tang HTTP auth.
-
-### 15.4. AppRoutes chua phai router day du
-
-Noi dung hien tai chi render `MainLayout`.
-Neu co nhieu trang, nen cai React Router va dua route vao `AppRoutes.tsx`, theo cach project `Frontends` dang lam.
-
-### 15.5. CSS class can dong bo voi JSX
-
-Khi dat class trong JSX, ten class phai ton tai trong `styles.css`.
-Neu component dung class moi ma CSS chua co, giao dien van co the chay nhung khong duoc style.
-
-Vi du, neu JSX dung `className="button-primary"` thi CSS phai co `.button-primary`.
+Công cụ nên cài trên trình duyệt: **React Developer Tools**, **Redux DevTools** (xem store thay đổi theo từng action).
 
 ---
 
-## 16. Lo trinh hoc Frontend de lam viec voi BE
+## 9. Còn tạm / chờ BE
 
-### Giai doan 1: HTML va CSS
-
-Hoc:
-
-- The semantic: `form`, `label`, `input`, `button`, `main`, `header`.
-- Box model: margin, padding, border.
-- Flexbox va Grid.
-- Responsive media query.
-- Class CSS va cascade.
-
-Bai tap:
-
-- Tao form login bang HTML.
-- Can giua form tren desktop va mobile.
-- Hien thi loi mau do.
-
-### Giai doan 2: JavaScript tren trinh duyet
-
-Hoc:
-
-- Variable, function, object, array.
-- Destructuring.
-- Promise va `async/await`.
-- `fetch`.
-- Event va event handler.
-- JSON.
-
-Bai tap:
-
-- Goi mot API bang `fetch`.
-- In response ra console.
-- Bat loi bang `try/catch`.
-
-### Giai doan 3: React
-
-Hoc:
-
-- Component.
-- Props.
-- State.
-- Conditional rendering.
-- List va `key`.
-- Form controlled.
-- `useEffect` cho load data.
-
-Bai tap:
-
-- Tao list user.
-- Tao form create user.
-- Them loading va error.
-
-### Giai doan 4: TypeScript
-
-Hoc:
-
-- Type primitive.
-- Object type.
-- Union type.
-- Optional field.
-- Generic.
-- Type import.
-- Type response API.
-
-Bai tap:
-
-- Khai bao DTO frontend trung DTO BE.
-- Khong dung `any` neu co the biet type.
-
-### Giai doan 5: Cau truc ung dung
-
-Hoc:
-
-- Service layer.
-- Shared utility.
-- Store.
-- Routing.
-- Authentication.
-- Authorization.
-- Error boundary.
-- Code splitting/lazy loading.
-
-Day la giai doan ma ban co the mo rong `Eco_FE` theo project `Frontends`.
-
----
-
-## 17. Checklist khi tao module moi
-
-Truoc khi code:
-
-- [ ] Da doc API contract tu Backend.
-- [ ] Biet method, URL, body va response.
-- [ ] Biet API co can Bearer token khong.
-- [ ] Xac dinh module nghiep vu.
-
-Khi tao file:
-
-- [ ] Tao folder trong `src/modules/<ten-module>`.
-- [ ] Tao page/component chinh.
-- [ ] Tao `index.ts` de export module.
-- [ ] Tao service dung tang phu hop.
-- [ ] Khai bao type request/response.
-- [ ] Dung alias import dung quy uoc.
-- [ ] Xu ly loading.
-- [ ] Xu ly error.
-- [ ] Xu ly empty state neu la danh sach.
-- [ ] Gan `key` khi render array.
-- [ ] Dat class CSS co y nghia.
-
-Sau khi code:
-
-- [ ] Chay `npm run build`.
-- [ ] Mo DevTools Network.
-- [ ] Test success.
-- [ ] Test sai input.
-- [ ] Test BE tat.
-- [ ] Test reload trang neu co auth.
-- [ ] Test man hinh mobile.
-
----
-
-## 18. Mau luong lam viec hang ngay
-
-```text
-1. Pull code moi nhat
-2. Chay npm install neu package thay doi
-3. Chay npm run dev
-4. Doc endpoint BE can lam
-5. Tao type request/response
-6. Tao service
-7. Tao component/module
-8. Noi module vao route
-9. Test tren trinh duyet
-10. Kiem tra Network va Console
-11. Chay npm run build
-12. Review diff truoc khi commit
-```
-
-Khi gap loi, hay phan loai truoc:
-
-- Loi compile/type: xem terminal va TypeScript.
-- Loi render: xem Console va component tree.
-- Loi API: xem Network, status code, payload, response.
-- Loi layout: xem Elements va CSS computed styles.
-- Loi auth: xem token, header, expiry, Backend log.
-
----
-
-## 19. Tom tat cac nguyen tac can nho
-
-1. Component hien thi va dieu khien tuong tac.
-2. Service goi API.
-3. Utility xu ly logic dung chung.
-4. Store giu trang thai dung chung.
-5. Module gom code theo nghiep vu.
-6. Layout gom bo cuc lon.
-7. Route quyet dinh trang nao duoc hien thi.
-8. Type phai khop contract Backend.
-9. Loading va error la mot phan bat buoc cua flow API.
-10. Moi thay doi phai build lai.
-11. Khong copy logic HTTP vao tung component.
-12. Khong dat business logic Backend vao Frontend.
-13. Khong sua ten field request neu chua doi contract BE.
-14. Alias import phai dong bo giua TypeScript va Vite.
-15. Khi mo rong project, uu tien giu cau truc `modules`, `shared`, `layouts`, `store`.
-
-Neu ban nam duoc 15 nguyen tac tren, ban da co nen tang du de tiep tuc noi cac API con lai cua `Eco_BE` vao `Eco_FE` mot cach co to chuc.
+| Chỗ | Hiện tại | Khi BE Pha 2 xong |
+|---|---|---|
+| `AuthService.login` | Gửi thêm `deviceInfo`, `ipAddress` (BE đang bắt buộc) | Bỏ 2 field, BE tự lấy từ `HttpContext` |
+| `AuthService.logout` | Gửi refresh token dạng chuỗi trần | Gửi `{ refreshToken }` |
+| Tự refresh khi 401 | Code có, chưa thử thực tế được (BE chưa có API nào `[Authorize]`) | Thử khi có API cần đăng nhập |
+| Module `admin.nguoi-dung` | Chưa có | Làm khi BE có `PagedResult<T>` + API người dùng |
+| Đăng nhập khi chưa xác thực email | BE vẫn cho vào | Pha 3 |
